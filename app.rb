@@ -4,6 +4,7 @@ require 'rubygems'
 require 'sinatra'
 require 'sinatra/reloader'
 require 'pony'
+require 'sqlite3'
 
 get '/' do
   erb 'Hello! <a href=\"https://github.com/bootstrap-ruby/sinatra-bootstrap\">Original</a> pattern has been modified for <a href=\"http://rubyschool.us/\">Ruby School</a>!!!'
@@ -23,11 +24,19 @@ get '/contacts' do
 end
 
 post '/contacts' do
+
+  @email = params[:email]
+  @message = params[:message]
+  
+  db = SQLite3::Database.new barbershop.sqlite
+  db.execute "insert into Contacts(Email, Message) values (#{@email}, #{@message})"
+  db.close
+
   Pony.mail(
-    to: params[:email],
+    to: @email,
     from: 'ruby.learnmail@gmail.com',
     via: :smtp,
-    body: params[:message],
+    body: @message,
     via_options: {
       address: 'smtp.gmail.com',
       port: 587,
@@ -87,11 +96,20 @@ post '/visit' do
   @error = 'Введите номер телефона' if @phone == ''
   @error = 'Неправильная дата и время' if @date_time == ''
 
-  return erb :visit if @error != ''
+  return erb :visit if @error != nil
 
-  file = File.open('./Public/visits.txt', 'a')
-  file.write("#{@date_time} ожидайте визита #{@customer_name} к мастеру #{@master}. Контактный телефон #{@phone}")
-  file.close
+  # file = File.open('./Public/visits.txt', 'a')
+  # file.write("#{@date_time} ожидайте визита #{@customer_name} к мастеру #{@master}. Контактный телефон #{@phone}")
+  # file.close
+
+  puts 'Hey-ho'
+
+  db = SQLite3::Database.new 'barbershop.sqlite'
+  # db.execute "insert into Users(Name, Phone, DateStamp, Barber, Color) values (\"#{@customer_name}\", \"#{@phone}\", \"#{@date_time}\", \"#{@master}\", \"#{@color})\""
+  db.execute 'insert into Users(Name, Phone, DateStamp, Barber, Color) values (?, ?, ?, ?, ?)', [@customer_name, @phone, @date_time, @master, @color]
+  db.close
+
+  puts 'Hey-ho'
 
   erb :visitsuccessful
 end

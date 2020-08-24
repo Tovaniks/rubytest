@@ -3,10 +3,10 @@
 
 <form action="/visit" method="POST">
 
-  <select class="form-control" name="master">
-    <option>Уолтер Вайт</option>
-    <option>Джесси Пинкман</option>
-    <option>Гус что-то там</option>  
+  <select class="form-control" name="master" value=<%=@master%>>
+    <option <%= 'selected' if @master == 'Walter White<'%>>Walter White</option>
+    <option <%= 'selected' if @master == 'Jassie'%>>Jassie</option>
+    <option <%= 'selected' if @master == 'Gus'%>>Gus</option>  
   </select>
 
   <div class="form-group">
